@@ -62,17 +62,10 @@ function buildReplacementText(textToEncode, encodedText) {
     let evalString = encodedText.replace('@2.0@', '@2.1@').replace(/\n/g, '');
     return evalString;
 }
-function t2j(input) {
-    // Use the console to output diagnostic information (console.log) and errors (console.error)
-    // This line of code will only be executed once when your extension is activated
-    // console.log('Congratulations, your extension "texttojsxbin" is now active!');
-    // The command has been defined in the package.json file
-    // Now provide the implementation of the command with registerCommand
-    // The commandId parameter must match the command field in package.json
+function encode(input) {
     let textToEncode = input;
     let encodedText = "";
     let textToReplace = "";
-    init();
     try {
         encodedText = exportContentToJSX(textToEncode);
         if (encodedText === "") {
@@ -88,8 +81,29 @@ function t2j(input) {
         destroy();
         process.exit(1);
     }
+    return textToReplace;
+}
+function addEval(input) {
+    return `eval("${input}");`;
+}
+function single(inputText, needEval = true) {
+    init();
+    let textToReplace = encode(inputText);
+    if (textToReplace && needEval) {
+        textToReplace = addEval(textToReplace);
+    }
     destroy();
     return textToReplace;
 }
-exports.default = t2j;
+exports.single = single;
+function multi(inputArray, needEval = true) {
+    init();
+    let jsxbinArr = inputArray.map(encode);
+    if (jsxbinArr && needEval) {
+        jsxbinArr = jsxbinArr.map(e => `eval("${e}");`);
+    }
+    destroy();
+    return jsxbinArr;
+}
+exports.multi = multi;
 //# sourceMappingURL=index.js.map

@@ -74,23 +74,10 @@ function buildReplacementText(textToEncode: String, encodedText: String) {
 	return evalString;
 }
 
-function t2j(input: String) {
-
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	// console.log('Congratulations, your extension "texttojsxbin" is now active!');
-
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-
-
+function encode(input: String) {
 	let textToEncode = input;
 	let encodedText = "";
-	let textToReplace = "";
-
-	init();
-
+	let textToReplace: String = "";
 	try {
 		encodedText = exportContentToJSX(textToEncode);
 
@@ -108,12 +95,45 @@ function t2j(input: String) {
 		destroy();
 		process.exit(1);
 	}
+	return textToReplace;
+}
 
+
+
+
+
+function addEval(input: String) {
+	return `eval("${input}");`
+}
+
+function single(inputText: String, needEval: Boolean = true) {
+
+	init();
+
+	let textToReplace = encode(inputText);
+
+	if (textToReplace && needEval) {
+		textToReplace = addEval(textToReplace);
+	}
 
 	destroy();
 
 	return textToReplace;
 }
 
+function multi(inputArray: Array<String>, needEval: Boolean = true) {
 
-export default t2j
+	init();
+
+	let jsxbinArr = inputArray.map(encode);
+
+	if (jsxbinArr && needEval) {
+		jsxbinArr = jsxbinArr.map(e => `eval("${e}");`)
+	}
+
+	destroy();
+
+	return jsxbinArr;
+}
+
+export { single, multi }
