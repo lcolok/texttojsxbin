@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.multi = exports.single = void 0;
 const path_1 = require("path");
 function GetESDInterface() {
     const platform = `${process.platform}`;
