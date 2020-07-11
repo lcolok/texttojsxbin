@@ -1,21 +1,24 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.multi = exports.single = void 0;
+exports.destroy = exports.init = exports.t2j = exports.multi = exports.single = void 0;
 const path_1 = require("path");
 function GetESDInterface() {
     const platform = `${process.platform}`;
     const platformArch = `${process.arch}`;
     var esdinterface = undefined;
-    var ESdebugExtensionPath = path_1.resolve('public/jsxbin/esdebugger-core');
+    var ESdebugExtensionPath = path_1.resolve("public/jsxbin/esdebugger-core");
     if (platform === "darwin") {
-        esdinterface = require(ESdebugExtensionPath + "/mac/esdcorelibinterface.node");
+        esdinterface = require(ESdebugExtensionPath +
+            "/mac/esdcorelibinterface.node");
     }
     else if (platform === "win32") {
         if (platformArch === "x64" || platformArch === "arm64") {
-            esdinterface = require(ESdebugExtensionPath + "/win/x64/esdcorelibinterface.node");
+            esdinterface = require(ESdebugExtensionPath +
+                "/win/x64/esdcorelibinterface.node");
         }
         else {
-            esdinterface = require(ESdebugExtensionPath + "/win/win32/esdcorelibinterface.node");
+            esdinterface = require(ESdebugExtensionPath +
+                "/win/win32/esdcorelibinterface.node");
         }
         if (esdinterface === undefined) {
             console.log("Platform not supported: " + platform);
@@ -44,9 +47,11 @@ function init() {
         fetchLastErrorAndExit();
     }
 }
+exports.init = init;
 function destroy() {
     GetESDInterface().esdDestroy();
 }
+exports.destroy = destroy;
 function exportContentToJSX(scriptSource) {
     var compiledSource = "";
     var apiData = GetESDInterface().esdCompileToJSXBin(scriptSource, "", "");
@@ -60,7 +65,7 @@ function exportContentToJSX(scriptSource) {
     return compiledSource;
 }
 function buildReplacementText(textToEncode, encodedText) {
-    let evalString = encodedText.replace('@2.0@', '@2.1@').replace(/\n/g, '');
+    let evalString = encodedText.replace("@2.0@", "@2.1@").replace(/\n/g, "");
     return evalString;
 }
 function encode(input) {
@@ -87,24 +92,73 @@ function encode(input) {
 function addEval(input) {
     return `eval("${input}");`;
 }
-function single(inputText, needEval = true) {
-    init();
+function single(inputText, config) {
+    const { needEval, initNDestroy } = config || {
+        needEval: true,
+        initNDestroy: false
+    };
+    if (initNDestroy) {
+        init();
+    }
     let textToReplace = encode(inputText);
     if (textToReplace && needEval) {
         textToReplace = addEval(textToReplace);
     }
-    destroy();
+    if (initNDestroy) {
+        destroy();
+    }
     return textToReplace;
 }
 exports.single = single;
-function multi(inputArray, needEval = true) {
-    init();
+function multi(inputArray, config) {
+    const { needEval, initNDestroy } = config || {
+        needEval: true,
+        initNDestroy: false
+    };
+    if (initNDestroy) {
+        init();
+    }
     let jsxbinArr = inputArray.map(encode);
     if (jsxbinArr && needEval) {
         jsxbinArr = jsxbinArr.map(e => `eval("${e}");`);
     }
-    destroy();
+    if (initNDestroy) {
+        destroy();
+    }
     return jsxbinArr;
 }
 exports.multi = multi;
+function t2j(input, config) {
+    let result;
+    const { needEval, initNDestroy } = config || {
+        needEval: true,
+        initNDestroy: false
+    };
+    if (initNDestroy) {
+        init();
+    }
+    if (input instanceof Array) {
+        let jsxbinArr = input.map(encode);
+        if (jsxbinArr && needEval) {
+            result = jsxbinArr.map(e => `eval("${e}");`);
+        }
+        else {
+            result = jsxbinArr;
+        }
+    }
+    else if (typeof input === "string") {
+        let textToReplace = encode(input);
+        if (textToReplace && needEval) {
+            result = addEval(textToReplace);
+        }
+        else {
+            result = textToReplace;
+        }
+    }
+    if (initNDestroy) {
+        destroy();
+    }
+    return result;
+}
+exports.t2j = t2j;
 //# sourceMappingURL=index.js.map

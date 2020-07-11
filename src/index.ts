@@ -99,8 +99,19 @@ function addEval(input: String) {
   return `eval("${input}");`;
 }
 
-function single(inputText: String, needEval: Boolean = true) {
-  init();
+interface Config {
+  needEval: Boolean;
+  initNDestroy: Boolean;
+}
+function single(inputText: String, config: Config) {
+  const { needEval, initNDestroy } = config || {
+    needEval: true,
+    initNDestroy: false
+  };
+
+  if (initNDestroy) {
+    init();
+  }
 
   let textToReplace = encode(inputText);
 
@@ -108,13 +119,22 @@ function single(inputText: String, needEval: Boolean = true) {
     textToReplace = addEval(textToReplace);
   }
 
-  destroy();
+  if (initNDestroy) {
+    destroy();
+  }
 
   return textToReplace;
 }
 
-function multi(inputArray: Array<String>, needEval: Boolean = true) {
-  init();
+function multi(inputArray: Array<String>, config: Config) {
+  const { needEval, initNDestroy } = config || {
+    needEval: true,
+    initNDestroy: false
+  };
+
+  if (initNDestroy) {
+    init();
+  }
 
   let jsxbinArr = inputArray.map(encode);
 
@@ -122,9 +142,45 @@ function multi(inputArray: Array<String>, needEval: Boolean = true) {
     jsxbinArr = jsxbinArr.map(e => `eval("${e}");`);
   }
 
-  destroy();
+  if (initNDestroy) {
+    destroy();
+  }
 
   return jsxbinArr;
 }
 
-export { single, multi };
+function t2j(input: Array<String> | String, config: Config) {
+  let result;
+  const { needEval, initNDestroy } = config || {
+    needEval: true,
+    initNDestroy: false
+  };
+
+  if (initNDestroy) {
+    init();
+  }
+
+  if (input instanceof Array) {
+    let jsxbinArr = input.map(encode);
+    if (jsxbinArr && needEval) {
+      result = jsxbinArr.map(e => `eval("${e}");`);
+    } else {
+      result = jsxbinArr;
+    }
+  } else if (typeof input === "string") {
+    let textToReplace = encode(input);
+    if (textToReplace && needEval) {
+      result = addEval(textToReplace);
+    } else {
+      result = textToReplace;
+    }
+  }
+
+  if (initNDestroy) {
+    destroy();
+  }
+
+  return result;
+}
+
+export { single, multi, t2j, init, destroy };
