@@ -168,15 +168,15 @@ function stratification(sc: string) {
 function t2f(
   filePath: string,
   input: Array<string> | string,
-  config: Config,
-  callback?: (err: NodeJS.ErrnoException | null) => void
+  callback?: (err: NodeJS.ErrnoException | null) => void,
+  config?: Config
 ): void {
   let f = path.parse(filePath);
   let newDir = path.resolve(f.dir, f.name + ".jsxbin");
   if (input instanceof Array) {
     input = input.join("\n");
   }
-  let newConfig = _.assign(config, { needEval: false });
+  let newConfig = _.assign(config, { needEval: false, initNDestroy: false });
   let output = t2j(input, newConfig);
   output = stratification(output);
   if (callback === undefined) {

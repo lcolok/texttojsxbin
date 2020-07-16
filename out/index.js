@@ -143,13 +143,13 @@ exports.multi = multi;
 function stratification(sc) {
     return _.words(sc, /[@\.\w]{0,80}/g).join("\n");
 }
-function t2f(filePath, input, config, callback) {
+function t2f(filePath, input, callback, config) {
     let f = path.parse(filePath);
     let newDir = path.resolve(f.dir, f.name + ".jsxbin");
     if (input instanceof Array) {
         input = input.join("\n");
     }
-    let newConfig = _.assign(config, { needEval: false });
+    let newConfig = _.assign(config, { needEval: false, initNDestroy: false });
     let output = t2j(input, newConfig);
     output = stratification(output);
     if (callback === undefined) {
