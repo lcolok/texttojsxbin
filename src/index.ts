@@ -1,6 +1,7 @@
 import { resolve } from "path";
 import * as _ from "lodash";
 import * as fs from "fs";
+import * as path from "path";
 
 function GetESDInterface() {
   const platform = `${process.platform}`;
@@ -170,6 +171,8 @@ function t2f(
   config: Config,
   callback?: (err: NodeJS.ErrnoException | null) => void
 ): void {
+  let f = path.parse(filePath);
+  let newDir = path.resolve(f.dir, f.name + ".jsxbin");
   if (input instanceof Array) {
     input = input.join("\n");
   }
@@ -177,9 +180,9 @@ function t2f(
   let output = t2j(input, newConfig);
   output = stratification(output);
   if (callback === undefined) {
-    fs.writeFileSync(filePath, output);
+    fs.writeFileSync(newDir, output);
   } else {
-    fs.writeFile(filePath, output, callback);
+    fs.writeFile(newDir, output, callback);
   }
 }
 

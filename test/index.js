@@ -9,6 +9,6 @@ console.log("jsxbin", jsxbin);
 let jsxbin2 = t2j(["1", "2", "3", "4"]);
 console.log("jsxbin", jsxbin2);
 
-t2f("./hahah", `alert('哈哈哈哈');`);
+t2f("./hahah.min.jsx", `alert('哈哈哈哈');`);
 
 destroy()();

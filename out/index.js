@@ -4,6 +4,7 @@ exports.destroy = exports.init = exports.t2f = exports.t2j = exports.multi = exp
 const path_1 = require("path");
 const _ = require("lodash");
 const fs = require("fs");
+const path = require("path");
 function GetESDInterface() {
     const platform = `${process.platform}`;
     const platformArch = `${process.arch}`;
@@ -143,17 +144,19 @@ function stratification(sc) {
     return _.words(sc, /[@\.\w]{0,80}/g).join("\n");
 }
 function t2f(filePath, input, config, callback) {
+    let f = path.parse(filePath);
+    let newDir = path.resolve(f.dir, f.name + ".jsxbin");
     if (input instanceof Array) {
-        input = input.join("");
+        input = input.join("\n");
     }
     let newConfig = _.assign(config, { needEval: false });
     let output = t2j(input, newConfig);
     output = stratification(output);
     if (callback === undefined) {
-        fs.writeFileSync(filePath, output);
+        fs.writeFileSync(newDir, output);
     }
     else {
-        fs.writeFile(filePath, output, callback);
+        fs.writeFile(newDir, output, callback);
     }
 }
 exports.t2f = t2f;
