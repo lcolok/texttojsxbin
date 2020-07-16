@@ -1,7 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.destroy = exports.init = exports.t2j = exports.multi = exports.single = void 0;
+exports.destroy = exports.init = exports.t2f = exports.t2j = exports.multi = exports.single = void 0;
 const path_1 = require("path");
+const _ = require("lodash");
+const fs = require("fs");
 function GetESDInterface() {
     const platform = `${process.platform}`;
     const platformArch = `${process.arch}`;
@@ -137,6 +139,24 @@ function multi(inputArray, config) {
     return jsxbinArr;
 }
 exports.multi = multi;
+function stratification(sc) {
+    return _.words(sc, /[@\.\w]{0,80}/g).join("\n");
+}
+function t2f(filePath, input, config, callback) {
+    if (input instanceof Array) {
+        input = input.join("");
+    }
+    let newConfig = _.assign(config, { needEval: false });
+    let output = t2j(input, newConfig);
+    output = stratification(output);
+    if (callback === undefined) {
+        fs.writeFileSync(filePath, output);
+    }
+    else {
+        fs.writeFile(filePath, output, callback);
+    }
+}
+exports.t2f = t2f;
 function t2j(input, config) {
     let result;
     const { needEval, initNDestroy } = config || {

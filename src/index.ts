@@ -1,4 +1,6 @@
 import { resolve } from "path";
+import * as _ from "lodash";
+import * as fs from "fs";
 
 function GetESDInterface() {
   const platform = `${process.platform}`;
@@ -158,7 +160,30 @@ function multi(inputArray: Array<String>, config: Config) {
   return jsxbinArr;
 }
 
-function t2j(input: Array<String> | String, config: Config) {
+function stratification(sc: string) {
+  return _.words(sc, /[@\.\w]{0,80}/g).join("\n");
+}
+
+function t2f(
+  filePath: string,
+  input: Array<string> | string,
+  config: Config,
+  callback?: (err: NodeJS.ErrnoException | null) => void
+): void {
+  if (input instanceof Array) {
+    input = input.join("\n");
+  }
+  let newConfig = _.assign(config, { needEval: false });
+  let output = t2j(input, newConfig);
+  output = stratification(output);
+  if (callback === undefined) {
+    fs.writeFileSync(filePath, output);
+  } else {
+    fs.writeFile(filePath, output, callback);
+  }
+}
+
+function t2j(input: Array<string> | string, config: Config): any {
   let result;
   const { needEval, initNDestroy } = config || {
     needEval: true,
@@ -192,4 +217,4 @@ function t2j(input: Array<String> | String, config: Config) {
   return result;
 }
 
-export { single, multi, t2j, init, destroy };
+export { single, multi, t2j, t2f, init, destroy };
