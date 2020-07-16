@@ -40,16 +40,25 @@ function fetchLastErrorAndExit() {
   process.exit(1);
 }
 
-function init() {
+function init(): Function {
   var initData = GetESDInterface().esdInit();
 
   if (initData.status !== 0) {
-    console.log("Unable to proceed. Error Code: " + initData.status);
-    fetchLastErrorAndExit();
+    switch (initData.status) {
+      case 11:
+        console.log("The esdcorelibinterface has been initialized.");
+        break;
+      default:
+        console.log("Unable to proceed. Error Code: " + initData.status);
+        fetchLastErrorAndExit();
+        break;
+    }
   }
+  return init;
 }
-function destroy() {
+function destroy(): Function {
   GetESDInterface().esdDestroy();
+  return destroy;
 }
 
 function exportContentToJSX(scriptSource: any) {
